@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Your Better Day</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; line-height: 1.5; }
+    h1 { margin-top: 0; }
+    .card { background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; }
+    label { display: block; margin-top: 14px; font-weight: 600; }
+    input, textarea { width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.2); font: inherit; }
+    textarea { min-height: 80px; resize: vertical; }
+    button { margin-top: 18px; padding: 12px 20px; font: inherit; border: 0; border-radius: 10px; cursor: pointer; background: #0b6efd; color: white; }
+    button:disabled { opacity: 0.7; cursor: wait; }
+    .result { display: none; margin-top: 24px; }
+    .result h2 { margin: 0 0 8px 0; }
+    .muted { font-size: 0.9rem; opacity: 0.8; }
+  </style>
+</head>
+<body>
+  <h1>Your Better Day</h1>
+  <p class="muted">
+    This site will collect some personal information about you in order to generate a customized compliment and affirmation to brighten your day. We do not retain or sell your personal information.
+  </p>
+
+  <div class="card">
+    <form id="complimentForm">
+      <label>Name
+        <input type="text" id="name" required />
+      </label>
+
+      <label>Date of Birth, use MM/DD/YYYY or MM/DD
+        <input type="text" id="dob" placeholder="MM/DD/YYYY or MM/DD" required />
+      </label>
+
+      <label>Biggest personal fear
+        <input type="text" id="fear" placeholder="Spiders, failure, an upcoming test, etc." required />
+      </label>
+
+      <label>Favorite color
+        <input type="text" id="color" required />
+      </label>
+
+      <label>A word you resonate with recently
+        <input type="text" id="word" required />
+      </label>
+
+      <label>Favorite book
+        <input type="text" id="book" required />
+      </label>
+
+      <label>Something you have been concerned about lately
+        <textarea id="concern" required></textarea>
+      </label>
+
+      <button type="submit" id="submitBtn">Submit</button>
+      <div id="hint" class="muted" style="margin-top:8px;"></div>
+    </form>
+  </div>
+
+  <div id="results" class="result card">
+    <h2>Compliment</h2>
+    <p id="compliment"></p>
+    <h2>Daily Affirmation</h2>
+    <p id="affirmation"></p>
+  </div>
+
+  <script>
+    const API_URL = "https://r4x78qtqo3.execute-api.us-east-1.amazonaws.com/compliment";
+
+    const form = document.getElementById("complimentForm");
+    const results = document.getElementById("results");
+    const complimentEl = document.getElementById("compliment");
+    const affirmationEl = document.getElementById("affirmation");
+    const submitBtn = document.getElementById("submitBtn");
+    const hint = document.getElementById("hint");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      hint.textContent = "";
+      submitBtn.disabled = true;
+      const original = submitBtn.textContent;
+      submitBtn.textContent = "Thinking…";
+
+      const data = {
+        name: document.getElementById("name").value.trim(),
+        dob: document.getElementById("dob").value.trim(),
+        fear: document.getElementById("fear").value.trim(),
+        color: document.getElementById("color").value.trim(),
+        word: document.getElementById("word").value.trim(),
+        book: document.getElementById("book").value.trim(),
+        concern: document.getElementById("concern").value.trim()
+      };
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`API ${res.status} ${text}`);
+        }
+
+        const json = await res.json();
+        complimentEl.textContent = json.compliment || "(no text returned)";
+        affirmationEl.textContent = json.affirmation || "(no text returned)";
+        results.style.display = "block";
+        window.scrollTo({ top: results.offsetTop, behavior: "smooth" });
+      } catch (err) {
+        results.style.display = "block";
+        complimentEl.textContent = "Sorry, something went wrong.";
+        affirmationEl.textContent = String(err);
+        hint.textContent = "If this keeps happening, refresh and try again.";
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = original;
+      }
+    });
+  </script>
+</body>
+</html>
