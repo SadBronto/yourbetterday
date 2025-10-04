@@ -68,7 +68,8 @@
   </div>
 
   <script>
-    const API_URL = "https://r4x78qtoq3.execute-api.us-east-1.amazonaws.com";
+    // Use the route, not the base URL
+    const API_URL = "https://r4x78qtoq3.execute-api.us-east-1.amazonaws.com/compliment";
 
     const form = document.getElementById("complimentForm");
     const results = document.getElementById("results");
@@ -82,7 +83,7 @@
       hint.textContent = "";
       submitBtn.disabled = true;
       const original = submitBtn.textContent;
-      submitBtn.textContent = "Thinking…";
+      submitBtn.textContent = "Thinking...";
 
       const data = {
         name: document.getElementById("name").value.trim(),
@@ -95,10 +96,13 @@
       };
 
       try {
+        // CORS preflight and POST will hit /compliment
         const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
+          body: JSON.stringify(data),
+          // cache bust to avoid stale proxies during setup
+          cache: "no-store"
         });
 
         if (!res.ok) {
@@ -121,6 +125,9 @@
         submitBtn.textContent = original;
       }
     });
+
+    // Quick console breadcrumb for you
+    console.log("Using API_URL:", API_URL);
   </script>
 </body>
 </html>
