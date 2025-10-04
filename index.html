@@ -1,87 +1,426 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Your Better Day</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A thoughtful compliment and a daily affirmation, tailored to you.">
+
+  <!-- Favicon and icons -->
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="icon" type="image/png" sizes="32x32" href="logo-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="logo-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="logo-192.png">
+
+  <!-- Social sharing -->
+  <meta property="og:title" content="Your Better Day">
+  <meta property="og:description" content="A thoughtful compliment and a daily affirmation, tailored to you.">
+  <meta property="og:image" content="https://yourbetter.day/logo-1024.png">
+  <meta property="og:url" content="https://yourbetter.day/">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Address bar color on mobile -->
+  <meta name="theme-color" content="#2F9E7E">
+
   <style>
-    :root { color-scheme: light dark; }
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; line-height: 1.5; }
-    h1 { margin-top: 0; }
-    .card { background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 16px; }
-    label { display: block; margin-top: 14px; font-weight: 600; }
-    input, textarea { width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.2); font: inherit; }
-    textarea { min-height: 80px; resize: vertical; }
-    button { margin-top: 18px; padding: 12px 20px; font: inherit; border: 0; border-radius: 10px; cursor: pointer; background: #0b6efd; color: white; }
-    button:disabled { opacity: 0.7; cursor: wait; }
-    .result { display: none; margin-top: 24px; }
-    .result h2 { margin: 0 0 8px 0; }
-    .muted { font-size: 0.9rem; opacity: 0.8; }
+    /* Calm Focus palette */
+    :root {
+      --bg: #F6FBF8;
+      --surface: #FFFFFF;
+      --text: #142022;
+      --muted: #5B6E69;
+      --primary: #2F9E7E;
+      --primary-hover: #27866B;
+      --accent: #F1B24A;
+      --outline: #C7E6D9;
+      --danger: #E35B5B;
+      --ok: #2F9E7E;
+      --shadow: 0 6px 24px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.06);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0E1516;
+        --surface: #0F1A1B;
+        --text: #EAF1EE;
+        --muted: #99ADA8;
+        --primary: #3FB294;
+        --primary-hover: #34A183;
+        --accent: #E7A94A;
+        --outline: #214742;
+        --shadow: 0 6px 24px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.35);
+      }
+    }
+
+    /* Base layout */
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 28px 16px 20px;
+      width: 100%;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    header img {
+      display: block;
+      margin: 0 auto 12px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      box-shadow: var(--shadow);
+      background: var(--surface);
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+      letter-spacing: 0.2px;
+    }
+    .muted {
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--outline);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .stack { display: grid; gap: 16px; }
+    .stack-lg { display: grid; gap: 22px; }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--outline);
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+      outline: none;
+    }
+    input:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 25%, transparent);
+    }
+    textarea { min-height: 100px; resize: vertical; }
+
+    .hint-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn {
+      appearance: none;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font: inherit;
+      cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+      transition: transform 0.04s ease, background-color 0.15s ease;
+    }
+    .btn:hover { background: var(--primary-hover); }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    .btn-secondary:hover {
+      background: color-mix(in oklab, var(--primary) 10%, transparent);
+    }
+
+    .results { display: none; }
+    .results h2 { margin: 0 0 8px 0; font-size: 1.2rem; }
+    .results pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin: 0;
+      font-family: inherit;
+      line-height: 1.6;
+    }
+
+    .notice {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--outline);
+      background: color-mix(in oklab, var(--accent) 12%, var(--surface));
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    .error {
+      border-color: color-mix(in oklab, var(--danger) 40%, var(--outline));
+      background: color-mix(in oklab, var(--danger) 10%, var(--surface));
+    }
+    .ok {
+      border-color: color-mix(in oklab, var(--ok) 40%, var(--outline));
+      background: color-mix(in oklab, var(--ok) 10%, var(--surface));
+    }
+
+    footer {
+      padding: 18px 16px 28px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    footer a { color: var(--primary); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (min-width: 720px) {
+      .twocol {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>Your Better Day</h1>
-  <p class="muted">
-    This site will collect some personal information about you in order to generate a customized compliment and affirmation to brighten your day. We do not retain or sell your personal information. There's no database retaining any of this, as far as I (the creator) know. However, feel free to use nicknames, and/or stand-in information. But obviously it will be more useful, for you, if you provide accurate info.
-  </p>
+  <div class="container">
+    <header>
+      <!-- Use your uploaded logo file name if different -->
+      <img src="logo-256.png" alt="Your Better Day logo" width="120" height="120">
+      <h1>Your Better Day</h1>
+      <p class="muted">
+        This site collects only what you enter to generate a customized compliment and affirmation.
+        We do not retain or sell your personal information.
+        You can use nicknames if you prefer.
+      </p>
+    </header>
 
-  <div class="card">
-    <form id="complimentForm">
-      <label>Name
-        <input type="text" id="name" placeholder="Jo Doe" required />
-      </label>
+    <section class="card stack-lg" aria-labelledby="formTitle">
+      <h2 id="formTitle" style="margin:0;font-size:1.1rem;">Tell us a bit about you</h2>
 
-      <label>Date of Birth, use MM/DD/YYYY or MM/DD
-        <input type="text" id="dob" placeholder="MM/DD/YYYY or MM/DD" required />
-      </label>
+      <form id="complimentForm" class="stack" novalidate>
+        <div class="twocol">
+          <div class="field">
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" maxlength="250" placeholder="Jo Doe" required>
+            <div class="hint-row"><span class="muted">Up to 250 characters</span><span id="nameCount" class="muted"></span></div>
+          </div>
 
-      <label>Biggest personal fear
-        <input type="text" id="fear" placeholder="Spiders, failure, the inevitable heat death of the universe" required />
-      </label>
+          <div class="field">
+            <label for="dob">Date of Birth, use MM/DD/YYYY or MM/DD</label>
+            <input id="dob" name="dob" type="text" maxlength="250" placeholder="MM/DD/YYYY or MM/DD" required>
+            <div class="hint-row"><span class="muted">Flexible format</span><span id="dobCount" class="muted"></span></div>
+          </div>
+        </div>
 
-      <label>Favorite color
-        <input type="text" id="color" placeholder="Orange, Maroon, Sunsets Over Water..." required />
-      </label>
+        <div class="twocol">
+          <div class="field">
+            <label for="fear">Biggest personal fear</label>
+            <input id="fear" name="fear" type="text" maxlength="250" placeholder="Spiders, failure, public speaking..." required>
+            <div class="hint-row"><span class="muted">Up to 250 characters</span><span id="fearCount" class="muted"></span></div>
+          </div>
 
-      <label>A word you resonate with recently
-        <input type="text" id="word" placeholder="I don't think you need examples of words" required />
-      </label>
+          <div class="field">
+            <label for="color">Favorite color</label>
+            <input id="color" name="color" type="text" maxlength="250" placeholder="Orange, teal, sunsets over water..." required>
+            <div class="hint-row"><span class="muted">Up to 250 characters</span><span id="colorCount" class="muted"></span></div>
+          </div>
+        </div>
 
-      <label>Favorite book
-        <input type="text" id="book" placeholder="I really like The Hobbit. But put whatever you like!" required />
-      </label>
+        <div class="twocol">
+          <div class="field">
+            <label for="word">A word you resonate with recently</label>
+            <input id="word" name="word" type="text" maxlength="250" placeholder="A single word or short phrase" required>
+            <div class="hint-row"><span class="muted">Up to 250 characters</span><span id="wordCount" class="muted"></span></div>
+          </div>
 
-      <label>Something you have been concerned about lately
-        <textarea id="concern" placeholder="This is the place for something more immediate than your biggest fear. Maybe you're worried about your physical health? Getting a promotion? Losing your car keys?" required></textarea>
-      </label>
+          <div class="field">
+            <label for="book">Favorite book</label>
+            <input id="book" name="book" type="text" maxlength="250" placeholder="Any book you love" required>
+            <div class="hint-row"><span class="muted">Up to 250 characters</span><span id="bookCount" class="muted"></span></div>
+          </div>
+        </div>
 
-      <button type="submit" id="submitBtn">Submit</button>
-      <div id="hint" class="muted" style="margin-top:8px;"></div>
-    </form>
+        <div class="field">
+          <label for="concern">Something you have been concerned about lately</label>
+          <textarea id="concern" name="concern" maxlength="1000" placeholder="Share what has been on your mind..." required></textarea>
+          <div class="hint-row"><span class="muted">Up to 1000 characters</span><span id="concernCount" class="muted"></span></div>
+        </div>
+
+        <div class="btn-row">
+          <button type="submit" id="submitBtn" class="btn">Submit</button>
+          <div id="hint" class="muted" aria-live="polite"></div>
+        </div>
+
+        <div id="rateMsg" class="notice error" style="display:none;"></div>
+      </form>
+    </section>
+
+    <section id="results" class="results card stack" aria-live="polite">
+      <div class="stack">
+        <h2>Compliment</h2>
+        <pre id="compliment"></pre>
+        <div class="btn-row">
+          <button class="btn-secondary" id="copyCompliment">Copy compliment</button>
+          <button class="btn-secondary" id="shareCompliment">Share</button>
+        </div>
+      </div>
+
+      <div class="stack">
+        <h2>Daily Affirmation</h2>
+        <pre id="affirmation"></pre>
+        <div class="btn-row">
+          <button class="btn-secondary" id="copyAffirmation">Copy affirmation</button>
+          <button class="btn-secondary" id="shareAffirmation">Share</button>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <div id="results" class="result card">
-    <h2>Compliment</h2>
-    <p id="compliment"></p>
-    <h2>Daily Affirmation</h2>
-    <p id="affirmation"></p>
-  </div>
+  <footer>
+    <p>
+      This site offers supportive messages for general encouragement. It is not a medical, psychiatric, or mental health service. If you are in crisis, call your local emergency number or a trusted help line in your region.
+    </p>
+    <p class="muted">© <span id="year"></span> YourBetter.day</p>
+  </footer>
 
   <script>
-    // Use the route, not the base URL
     const API_URL = "https://r4x78qtoq3.execute-api.us-east-1.amazonaws.com/compliment";
 
+    const DAILY_LIMIT = 5;
+    function todayKey() {
+      const d = new Date();
+      return `ybd_hits_${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    }
+    function readHits() {
+      const raw = localStorage.getItem(todayKey());
+      return raw ? parseInt(raw, 10) || 0 : 0;
+    }
+    function incHits() {
+      localStorage.setItem(todayKey(), String(readHits() + 1));
+    }
+
+    // Elements
     const form = document.getElementById("complimentForm");
     const results = document.getElementById("results");
     const complimentEl = document.getElementById("compliment");
     const affirmationEl = document.getElementById("affirmation");
     const submitBtn = document.getElementById("submitBtn");
     const hint = document.getElementById("hint");
+    const rateMsg = document.getElementById("rateMsg");
+
+    const copyComplimentBtn = document.getElementById("copyCompliment");
+    const copyAffirmationBtn = document.getElementById("copyAffirmation");
+    const shareComplimentBtn = document.getElementById("shareCompliment");
+    const shareAffirmationBtn = document.getElementById("shareAffirmation");
+
+    // Simple character counters
+    const counters = [
+      ["name", "nameCount", 250],
+      ["dob", "dobCount", 250],
+      ["fear", "fearCount", 250],
+      ["color", "colorCount", 250],
+      ["word", "wordCount", 250],
+      ["book", "bookCount", 250],
+      ["concern", "concernCount", 1000],
+    ];
+    for (const [id, cid, max] of counters) {
+      const el = document.getElementById(id);
+      const out = document.getElementById(cid);
+      const update = () => { out.textContent = `${el.value.length}/${max}`; };
+      el.addEventListener("input", update);
+      update();
+    }
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Fetch helper with timeout
+    async function postWithTimeout(url, data, ms) {
+      const controller = new AbortController();
+      const t = setTimeout(() => controller.abort(), ms);
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        return res;
+      } finally {
+        clearTimeout(t);
+      }
+    }
+
+    // Share helpers
+    async function shareText(title, text) {
+      const shareUrl = location.origin;
+      if (navigator.share) {
+        try {
+          await navigator.share({ title, text, url: shareUrl });
+          return;
+        } catch (_) { /* ignore */ }
+      }
+      const msg = encodeURIComponent(text + "\\n\\n" + shareUrl);
+      window.open("https://twitter.com/intent/tweet?text=" + msg, "_blank", "noopener,noreferrer");
+    }
+
+    function setDisabled(on) {
+      submitBtn.disabled = on;
+      [...form.elements].forEach(e => e.disabled = on && e !== submitBtn);
+    }
+
+    // Rate limit check
+    function checkLimit() {
+      const hits = readHits();
+      if (hits >= DAILY_LIMIT) {
+        rateMsg.style.display = "block";
+        rateMsg.textContent = `Daily limit reached - you can submit up to ${DAILY_LIMIT} times per day from this browser.`;
+        return false;
+      }
+      rateMsg.style.display = "none";
+      return true;
+    }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      if (!checkLimit()) return;
+
       hint.textContent = "";
-      submitBtn.disabled = true;
+      setDisabled(true);
       const original = submitBtn.textContent;
       submitBtn.textContent = "Thinking...";
 
@@ -92,41 +431,61 @@
         color: document.getElementById("color").value.trim(),
         word: document.getElementById("word").value.trim(),
         book: document.getElementById("book").value.trim(),
-        concern: document.getElementById("concern").value.trim()
+        concern: document.getElementById("concern").value.trim(),
       };
 
       try {
-        // CORS preflight and POST will hit /compliment
-        const res = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-          // cache bust to avoid stale proxies during setup
-          cache: "no-store"
-        });
-
+        const res = await postWithTimeout(API_URL, data, 30000);
         if (!res.ok) {
           const text = await res.text();
           throw new Error(`API ${res.status} ${text}`);
         }
-
         const json = await res.json();
         complimentEl.textContent = json.compliment || "(no text returned)";
         affirmationEl.textContent = json.affirmation || "(no text returned)";
-        results.style.display = "block";
-        window.scrollTo({ top: results.offsetTop, behavior: "smooth" });
+        results.style.display = "grid";
+        window.scrollTo({ top: results.offsetTop - 8, behavior: "smooth" });
+        incHits();
       } catch (err) {
-        results.style.display = "block";
+        results.style.display = "grid";
         complimentEl.textContent = "Sorry, something went wrong.";
         affirmationEl.textContent = String(err);
         hint.textContent = "If this keeps happening, refresh and try again.";
       } finally {
-        submitBtn.disabled = false;
+        setDisabled(false);
         submitBtn.textContent = original;
       }
     });
 
-    // Quick console breadcrumb for you
+    // Copy and share events
+    copyComplimentBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(complimentEl.textContent || "");
+        hint.textContent = "Compliment copied.";
+        setTimeout(() => hint.textContent = "", 1800);
+      } catch {
+        hint.textContent = "Copy did not work on this device.";
+      }
+    });
+    copyAffirmationBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(affirmationEl.textContent || "");
+        hint.textContent = "Affirmation copied.";
+        setTimeout(() => hint.textContent = "", 1800);
+      } catch {
+        hint.textContent = "Copy did not work on this device.";
+      }
+    });
+
+    shareComplimentBtn.addEventListener("click", () => {
+      const txt = complimentEl.textContent || "";
+      shareText("Your Better Day - Compliment", txt);
+    });
+    shareAffirmationBtn.addEventListener("click", () => {
+      const txt = affirmationEl.textContent || "";
+      shareText("Your Better Day - Affirmation", txt);
+    });
+
     console.log("Using API_URL:", API_URL);
   </script>
 </body>
