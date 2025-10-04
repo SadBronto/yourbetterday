@@ -21,6 +21,9 @@
   <meta name="theme-color" content="#2F9E7E">
 
   <style>
+    /* Reset */
+    *,*::before,*::after{box-sizing:border-box}
+
     /* Calm Focus palette */
     :root{
       --bg:#F6FBF8;
@@ -56,22 +59,24 @@
       display:grid;grid-template-rows:auto 1fr auto;
       -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
     }
-    .container{max-width:760px;margin:0 auto;padding:28px 16px 20px;width:100%}
+    .container{max-width:920px;margin:0 auto;padding:28px 16px 20px;width:100%}
     header{text-align:center;margin-bottom:12px}
+    .logo{width:84px;height:84px;object-fit:contain;border-radius:50%;display:block;margin:0 auto 10px}
     h1{margin:0 0 6px 0;font-size:clamp(1.4rem,2.2vw,1.9rem)}
     .muted{font-size:.95rem;color:var(--muted)}
-    .card{background:var(--surface);border:1px solid var(--outline);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+    .card{background:var(--surface);border:1px solid var(--outline);border-radius:14px;padding:18px;box-shadow:var(--shadow);overflow:hidden}
     .stack{display:grid;gap:16px}
     .stack-lg{display:grid;gap:22px}
 
     /* Form */
     label{display:block;margin-top:14px;font-weight:600}
     input,textarea{
-      width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--outline);
-      background:var(--surface);color:var(--text);font:inherit;outline:none
+      width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--outline);
+      background:var(--surface);color:var(--text);font:inherit;outline:none;
+      min-width:0
     }
     input:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(47,158,126,.2)}
-    textarea{min-height:100px;resize:vertical}
+    textarea{min-height:120px;resize:vertical}
 
     .btn-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     .btn{
@@ -94,17 +99,19 @@
     footer a{color:var(--primary);text-decoration:none}
     footer a:hover{text-decoration:underline}
 
-    @media (min-width:720px){
-      .twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media (min-width:760px){
+      .twocol{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+      .twocol > div{min-width:0}
     }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
+      <img src="logo.png" alt="Your Better Day logo" class="logo">
       <h1>Your Better Day</h1>
       <p class="muted">
-        This site will collect some personal information about you in order to generate a customized compliment and affirmation to brighten your day. We do not retain or sell your personal information. There's no database retaining any of this, as far as I (the creator) know. However, feel free to use nicknames, and/or stand-in information. But obviously it will be more useful, for you, if you provide accurate info.
+        This site will collect some personal information about you in order to generate a customized compliment and affirmation to brighten your day. We do not retain or sell your personal information. There's no database retaining any of this, as far as I (the creator) know. However, feel free to use nicknames, and, or stand in information. But obviously it will be more useful, for you, if you provide accurate info.
       </p>
     </header>
 
@@ -120,7 +127,7 @@
           </div>
 
           <div>
-            <label>Date of Birth, use MM/DD/YYYY or MM/DD
+            <label>Date of Birth
               <input type="text" id="dob" placeholder="MM/DD/YYYY or MM/DD" required maxlength="250">
             </label>
           </div>
@@ -270,7 +277,7 @@
       return true;
     }
 
-    // Submit handler
+    // Submit
     form.addEventListener("submit", async (e)=>{
       e.preventDefault();
       if(!checkLimit()) return;
@@ -335,7 +342,6 @@
     shareComplimentBtn.addEventListener("click", ()=>shareText("Your Better Day - Compliment", complimentEl.textContent || ""));
     shareAffirmationBtn.addEventListener("click", ()=>shareText("Your Better Day - Affirmation", affirmationEl.textContent || ""));
 
-    // Console breadcrumb
     console.log("Using API_URL:", API_URL);
   </script>
 </body>
